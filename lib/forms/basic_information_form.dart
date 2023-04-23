@@ -10,11 +10,11 @@ class BasicInformationForm extends StatefulWidget {
 class _BasicInformationFormState extends State<BasicInformationForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _textController = TextEditingController();
+  final TextEditingController _contentTextController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   late int _selectedRadio;
   final List<bool> _selectedCheckbox = [false, false, false, false, false];
   late DateTime _selectedDate = DateTime.now();
-
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +114,8 @@ class _BasicInformationFormState extends State<BasicInformationForm> {
                   if (picked != null && picked != _selectedDate) {
                     setState(() {
                       _selectedDate = picked;
-                      _dateController.text = picked.year.toString(); // Update the text controller
+                      _dateController.text =
+                          picked.year.toString(); // Update the text controller
                     });
                   }
                 },
@@ -133,6 +134,24 @@ class _BasicInformationFormState extends State<BasicInformationForm> {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
+              child: TextFormField(
+                controller: _contentTextController,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter text';
+                  }
+                  return null;
+                },
+                maxLines: null, // to enable multiple lines
+                decoration: const InputDecoration(
+                  hintText: 'Content',
+                  border: OutlineInputBorder(),
+                  labelText: 'Content',
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -141,7 +160,10 @@ class _BasicInformationFormState extends State<BasicInformationForm> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => NextPage(),
+                        builder: (context) => NextPage(
+                          key: _formKey,
+                          data: _contentTextController.text,
+                        ),
                       ),
                     );
                   }
@@ -157,47 +179,34 @@ class _BasicInformationFormState extends State<BasicInformationForm> {
 }
 
 class NextPage extends StatelessWidget {
+  String? data;
+
+  NextPage({Key? key, required this.data}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Next Page'),
+        title: const Text('Output'),
       ),
       body: Container(
         margin: const EdgeInsets.all(16.0),
         color: Colors.white,
         child: Column(
-          children: const [
-            SizedBox(height: 16.0),
+          children: [
+            const SizedBox(height: 16.0),
             Text(
-              'All iPhone owners issued official warning over \n'
-                  'costly mistake – everyone must check their Apple phones',
-              style: TextStyle(
+              data!,
+              style: const TextStyle(
                 fontFamily: 'Arial',
                 fontSize: 32,
                 color: Colors.red,
                 fontWeight: FontWeight.w800,
               ),
             ),
-            SizedBox(height: 16.0),
-            Text(
-              'If you are upgrading to a newer iPhone model, you need to make sure you prepare your old device the right way. That is, if you\'re '
-                  'planning to trade in, sell, or give away your phone, you need to make sure you clear all your data first.'
-                  'WHY DO I NEED TO DO THIS'
-              'It\'s important that you remove your personal information from your phone because you don\'t want it to fall into the wrong hands.'
-            'Bad actors can do a lot with your personal data, including accessing your iCloud account – and maybe even your Apple Pay information.'
-            'Apple recommends that users first transfer information to their new device, then, if applicable, remove their personal information from their old device.',
-              style: TextStyle(
-                fontFamily: 'Arial',
-                fontSize: 24,
-                color: Colors.green,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ],
         ),
       ),
-
     );
   }
 }
